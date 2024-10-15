@@ -9,7 +9,8 @@ import SwiftUI
 import WeatherKit
 
 struct ContentView: View {
-    let locationManager: LocationManager
+    @Environment(LocationManager.self) private var locationManager
+
     @State var temperature: String = ""
     @State var uvIndex: String = ""
     @State var weatherCondition: String = ""
@@ -68,9 +69,7 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var locationManager: LocationManager = .init()
-    static var previews: some View {
-        ContentView(locationManager: locationManager)
-    }
+#Preview {
+    ContentView()
+        .environment(LocationManager())
 }
