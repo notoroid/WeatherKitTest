@@ -18,7 +18,7 @@ struct WeatherView: View {
 
     var body: some View {
         VStack {
-            Text("気温:\(temperature)") .font(.largeTitle)
+            Text("気温:\(temperature)").font(.title)
             Text("UI指数:\(uvIndex)").font(.title)
             Text("天候:\(weatherCondition)").font(.title)
         }

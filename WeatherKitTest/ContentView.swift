@@ -46,9 +46,11 @@ struct CircleButtonStyle: ButtonStyle {
   }
 }
 
-enum WetherType {
+enum WeatherType {
     case currentWeather
     case hourly
+    case weatherChanges
+    case historicalComparisons
 }
 
 struct ContentView: View {
@@ -58,7 +60,7 @@ struct ContentView: View {
     @State var showErrorAlert: Bool = false
     @State var locationType = LocationType.sapporo
     
-    @State private var selectedWetherType: WetherType = .hourly
+    @State private var selectedWeatherType: WeatherType = .hourly
 
     var body: some View {
         VStack {
@@ -84,9 +86,11 @@ struct ContentView: View {
                 }
             }
 
-            Picker("天気情報", selection: $selectedWetherType, content: {
-                            Text("現在の気温").tag(WetherType.currentWeather)
-                            Text("24時間予報(iOS18 〜)").tag(WetherType.hourly)
+            Picker("天気情報", selection: $selectedWeatherType, content: {
+                            Text("現在の気温").tag(WeatherType.currentWeather)
+                            Text("24時間予報").tag(WeatherType.hourly)
+                            Text("天候変化").tag(WeatherType.weatherChanges)
+                            Text("過去平均値との比較").tag(WeatherType.historicalComparisons)
                         })
                         .pickerStyle(SegmentedPickerStyle()) // <1>
                         .padding(.horizontal)
@@ -113,9 +117,11 @@ struct ContentView: View {
                 } else {
                     let location: CLLocation = locationManager.currentLocation.location
                     
-                    switch selectedWetherType {
+                    switch selectedWeatherType {
                     case .currentWeather: WeatherView(location: location)
                     case .hourly: HourlyWeatherView(location: location)
+                    case .weatherChanges: WeatherChangesView(location: location)
+                    case .historicalComparisons: HistoricalComparisonsView(location: location)
                     }
                     
                     Spacer()
@@ -123,15 +129,19 @@ struct ContentView: View {
             } else {
                 switch locationType {
                 case .sapporo:
-                    switch selectedWetherType {
-                        case .currentWeather: WeatherView(location: locationType.location!)
-                        case .hourly: HourlyWeatherView(location: locationType.location!)
+                    switch selectedWeatherType {
+                    case .currentWeather: WeatherView(location: locationType.location!)
+                    case .hourly: HourlyWeatherView(location: locationType.location!)
+                    case .weatherChanges: WeatherChangesView(location: locationType.location!)
+                    case .historicalComparisons: HistoricalComparisonsView(location: locationType.location!)
                     }
                     Spacer()
                 case .tokyo:
-                    switch selectedWetherType {
-                        case .currentWeather: WeatherView(location: locationType.location!)
-                        case .hourly: HourlyWeatherView(location: locationType.location!)
+                    switch selectedWeatherType {
+                    case .currentWeather: WeatherView(location: locationType.location!)
+                    case .hourly: HourlyWeatherView(location: locationType.location!)
+                    case .weatherChanges: WeatherChangesView(location: locationType.location!)
+                    case .historicalComparisons: HistoricalComparisonsView(location: locationType.location!)
                     }
                     Spacer()
                 default:
