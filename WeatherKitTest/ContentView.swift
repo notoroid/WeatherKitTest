@@ -7,63 +7,111 @@
 
 import SwiftUI
 import WeatherKit
+import CoreLocation
+
+enum LocationType: Int, Identifiable {
+    var id: Int { self.rawValue }
+    
+    case here = 0
+    case sapporo = 1
+    case tokyo = 2
+    
+    var description: String {
+        switch self {
+        case .here: "現在地"
+        case .sapporo: "札幌"
+        case .tokyo: "東京"
+        }
+    }
+    var imageSystemName: String {
+        switch self {
+        case .here: "location.fill"
+        default: "bookmark.fill"
+        }
+    }
+    
+    var location: CLLocation? {
+        switch self {
+        case .here: nil
+        case .sapporo: CLLocation.sapporo
+        case .tokyo: CLLocation.tokyo
+        }
+    }
+}
+
+struct CircleButtonStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .foregroundStyle(.black)
+  }
+}
 
 struct ContentView: View {
     @Environment(LocationManager.self) private var locationManager
 
-    @State var temperature: String = ""
-    @State var uvIndex: String = ""
-    @State var weatherCondition: String = ""
     @State var errorMessage: String = ""
     @State var showErrorAlert: Bool = false
+    @State var locationType = LocationType.sapporo
     
     var body: some View {
-        
-        if !locationManager.currentLocation.active {
-            VStack {
-                Image(systemName: "location.circle.fill")
-                    .imageScale(.large)
-                    .foregroundColor(.accentColor)
-                Text("位置情報取得中…")
-            }.task {
-                do {
-                    try await locationManager.startCurrentLocation()
-                } catch let error {
-                    errorMessage = error.localizedDescription
-                    showErrorAlert = true
+        VStack {
+            HStack {
+                ForEach([LocationType.here,LocationType.sapporo,LocationType.tokyo]){ content in
+                    Button {
+                        locationType = content
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: content.imageSystemName)
+                                .frame(width: 52, height: 52)
+                                .foregroundColor(.white)
+                                .background(
+                                    locationType == content ? .blue : .gray
+                                )
+                                .cornerRadius(26)
+                            Text(content.description)
+                                .font(.system(size: 12, weight: .semibold))
+                                .frame(width: 80)
+                        }
+                    }
+                    .buttonStyle(CircleButtonStyle())
                 }
-            }.alert(errorMessage, isPresented: $showErrorAlert) {
-                Button("OK", role: .cancel, action: { errorMessage = ""})
             }
             
-            
-        } else {
-            VStack {
-                Text("気温:\(temperature)") .font(.largeTitle)
-                Text("UI指数:\(uvIndex)").font(.title)
-                Text("天候:\(weatherCondition)").font(.title)
-            }
-            .task {
-                let weatherService = WeatherService()
-                let currentLocation = locationManager.currentLocation
-                let weather = try! await weatherService.weather(for: currentLocation.location)
-                
-                let temperatureDescription = String(format: "%.2f", weather.currentWeather.temperature.value)
-                temperature = "\(temperatureDescription)"
-
-                switch weather.currentWeather.uvIndex.category {
-                    case .low:
-                        uvIndex = "低い (\(weather.currentWeather.uvIndex.value))"
-                    case .moderate:
-                        uvIndex = "適度 (\(weather.currentWeather.uvIndex.value))"
-                    case .high:
-                        uvIndex = "高い (\(weather.currentWeather.uvIndex.value))"
-                    case .veryHigh:
-                        uvIndex = "とても高い (\(weather.currentWeather.uvIndex.value))"
-                    case .extreme:
-                        uvIndex = "危険な高さ (\(weather.currentWeather.uvIndex.value))"
+            if locationType == .here {
+                if !locationManager.currentLocation.active {
+                    VStack {
+                        Spacer()
+                        Image(systemName: "location.circle.fill")
+                            .imageScale(.large)
+                            .foregroundColor(.accentColor)
+                        Text("位置情報取得中…")
+                        Spacer()
+                    }.task {
+                        do {
+                            try await locationManager.startCurrentLocation()
+                        } catch let error {
+                            errorMessage = error.localizedDescription
+                            showErrorAlert = true
+                        }
+                    }.alert(errorMessage, isPresented: $showErrorAlert) {
+                        Button("OK", role: .cancel, action: { errorMessage = ""})
+                    }
+                } else {
+                    let location: CLLocation = locationManager.currentLocation.location
+                    WeatherView(location: location)
+                    Spacer()
                 }
-                weatherCondition = weather.currentWeather.condition.description
+            } else {
+                switch locationType {
+                case .sapporo:
+                    WeatherView(location: locationType.location!)
+                    Spacer()
+                case .tokyo:
+                    WeatherView(location: locationType.location!)
+                    Spacer()
+                default:
+                    Spacer()
+                }
             }
         }
     }
