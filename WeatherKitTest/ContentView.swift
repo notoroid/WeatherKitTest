@@ -46,6 +46,11 @@ struct CircleButtonStyle: ButtonStyle {
   }
 }
 
+enum WetherType {
+    case currentWeather
+    case hourly
+}
+
 struct ContentView: View {
     @Environment(LocationManager.self) private var locationManager
 
@@ -53,6 +58,8 @@ struct ContentView: View {
     @State var showErrorAlert: Bool = false
     @State var locationType = LocationType.sapporo
     
+    @State private var selectedWetherType: WetherType = .hourly
+
     var body: some View {
         VStack {
             HStack {
@@ -76,6 +83,13 @@ struct ContentView: View {
                     .buttonStyle(CircleButtonStyle())
                 }
             }
+
+            Picker("天気情報", selection: $selectedWetherType, content: {
+                            Text("現在の気温").tag(WetherType.currentWeather)
+                            Text("24時間予報(iOS18 〜)").tag(WetherType.hourly)
+                        })
+                        .pickerStyle(SegmentedPickerStyle()) // <1>
+                        .padding(.horizontal)
             
             if locationType == .here {
                 if !locationManager.currentLocation.active {
@@ -98,16 +112,27 @@ struct ContentView: View {
                     }
                 } else {
                     let location: CLLocation = locationManager.currentLocation.location
-                    WeatherView(location: location)
+                    
+                    switch selectedWetherType {
+                    case .currentWeather: WeatherView(location: location)
+                    case .hourly: HourlyWeatherView(location: location)
+                    }
+                    
                     Spacer()
                 }
             } else {
                 switch locationType {
                 case .sapporo:
-                    WeatherView(location: locationType.location!)
+                    switch selectedWetherType {
+                        case .currentWeather: WeatherView(location: locationType.location!)
+                        case .hourly: HourlyWeatherView(location: locationType.location!)
+                    }
                     Spacer()
                 case .tokyo:
-                    WeatherView(location: locationType.location!)
+                    switch selectedWetherType {
+                        case .currentWeather: WeatherView(location: locationType.location!)
+                        case .hourly: HourlyWeatherView(location: locationType.location!)
+                    }
                     Spacer()
                 default:
                     Spacer()
