@@ -51,6 +51,8 @@ enum WeatherType {
     case hourly
     case weatherChanges
     case historicalComparisons
+//    case monthlyStatistics
+    case dailySummary
 }
 
 struct ContentView: View {
@@ -91,6 +93,8 @@ struct ContentView: View {
                             Text("24時間予報").tag(WeatherType.hourly)
                             Text("天候変化").tag(WeatherType.weatherChanges)
                             Text("過去平均値との比較").tag(WeatherType.historicalComparisons)
+//                            Text("月間統計").tag(WeatherType.monthlyStatistics)
+                            Text("3日概要").tag(WeatherType.dailySummary)
                         })
                         .pickerStyle(SegmentedPickerStyle()) // <1>
                         .padding(.horizontal)
@@ -122,6 +126,8 @@ struct ContentView: View {
                     case .hourly: HourlyWeatherView(location: location)
                     case .weatherChanges: WeatherChangesView(location: location)
                     case .historicalComparisons: HistoricalComparisonsView(location: location)
+//                    case .monthlyStatistics: MonthlyStatisticsView(location: location)
+                    case .dailySummary: DailySummaryView(location: location)
                     }
                     
                     Spacer()
@@ -134,6 +140,8 @@ struct ContentView: View {
                     case .hourly: HourlyWeatherView(location: locationType.location!)
                     case .weatherChanges: WeatherChangesView(location: locationType.location!)
                     case .historicalComparisons: HistoricalComparisonsView(location: locationType.location!)
+//                    case .monthlyStatistics: MonthlyStatisticsView(location: locationType.location!)
+                    case .dailySummary: DailySummaryView(location: locationType.location!)
                     }
                     Spacer()
                 case .tokyo:
@@ -142,6 +150,8 @@ struct ContentView: View {
                     case .hourly: HourlyWeatherView(location: locationType.location!)
                     case .weatherChanges: WeatherChangesView(location: locationType.location!)
                     case .historicalComparisons: HistoricalComparisonsView(location: locationType.location!)
+//                    case .monthlyStatistics: MonthlyStatisticsView(location: locationType.location!)
+                    case .dailySummary: DailySummaryView(location: locationType.location!)
                     }
                     Spacer()
                 default:
