@@ -15,12 +15,14 @@ enum LocationType: Int, Identifiable {
     case here = 0
     case sapporo = 1
     case tokyo = 2
+    case cupertino = 3
     
     var description: String {
         switch self {
         case .here: "現在地"
         case .sapporo: "札幌"
         case .tokyo: "東京"
+        case .cupertino: "クパチーノ"
         }
     }
     var imageSystemName: String {
@@ -35,6 +37,7 @@ enum LocationType: Int, Identifiable {
         case .here: nil
         case .sapporo: CLLocation.sapporo
         case .tokyo: CLLocation.tokyo
+        case .cupertino: CLLocation.cupertino
         }
     }
 }
@@ -67,7 +70,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             HStack {
-                ForEach([LocationType.here,LocationType.sapporo,LocationType.tokyo]){ content in
+                ForEach([LocationType.here,LocationType.sapporo,LocationType.tokyo,LocationType.cupertino]){ content in
                     Button {
                         locationType = content
                     } label: {
@@ -154,6 +157,15 @@ struct ContentView: View {
                     case .dailySummary: DailySummaryView(location: locationType.location!)
                     }
                     Spacer()
+                case .cupertino:
+                    switch selectedWeatherType {
+                    case .currentWeather: WeatherView(location: locationType.location!)
+                    case .hourly: HourlyWeatherView(location: locationType.location!)
+                    case .weatherChanges: WeatherChangesView(location: locationType.location!)
+                    case .historicalComparisons: HistoricalComparisonsView(location: locationType.location!)
+//                    case .monthlyStatistics: MonthlyStatisticsView(location: locationType.location!)
+                    case .dailySummary: DailySummaryView(location: locationType.location!)
+                    }
                 default:
                     Spacer()
                 }

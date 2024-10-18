@@ -16,4 +16,9 @@ extension CLLocation {
     static var tokyo: CLLocation {
         CLLocation(latitude: 35.689506, longitude: 139.691700)
     }
+    
+    static var cupertino: CLLocation {
+        CLLocation(latitude: 37.3175, longitude: -122.041944)
+    }
+
 }
